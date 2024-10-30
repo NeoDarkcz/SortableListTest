@@ -1,0 +1,54 @@
+﻿@page "/"
+@using BlazorSortableList
+
+<h4>odkaz na git/návod: https://github.com/AlexNek/BlazorSortableList</h4>
+
+<SortableList Id="simpleList" Items="items" OnUpdate="@SortList" Context="item">
+    <SortableItemTemplate>
+        @* style="user-select: none" JINAK TO OZNAČUJE TEXT při přesouvání *@
+        <div class="card has-border-light has-background-blazor has-text-white has-cursor-grab" style="user-select: none">
+            <p class="is-size-4 p-2 ml-4">@item.Name</p>
+        </div>
+    </SortableItemTemplate>
+</SortableList>
+@($"pořadí: {string.Join(", ", items)}")
+
+@code{
+    public class Item : ISelectableItem
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; } = "";
+
+        public bool Disabled { get; set; } = false;
+
+        public bool Selected { get; set; } = false;
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+
+    private List<Item> items = Enumerable.Range(1, 4).Select(i => new Item { Id = i, Name = $"Item {i}" }).ToList();
+
+    private void SortList((int oldIndex, int newIndex) indices)
+    {
+        var (oldIndex, newIndex) = indices;
+
+        var items = this.items;
+        var itemToMove = items[oldIndex];
+        items.RemoveAt(oldIndex);
+
+        if (newIndex < items.Count)
+        {
+            items.Insert(newIndex, itemToMove);
+        }
+        else
+        {
+            items.Add(itemToMove);
+        }
+
+        StateHasChanged();
+    }
+}
